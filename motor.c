@@ -1,123 +1,165 @@
-#include <fcntl.h>
 #include <stdlib.h>
 #include <string.h>
 
-#include "lms2012.h"
+#include <lms2012.h>
 
-const int  SPEED  = 50;
+#include "macros.h"
+#include "motor.h"
 
-typedef enum port_e {
-    Port_A = (1 << 0),
-    Port_B = (1 << 1),
-    Port_C = (1 << 2),
-    Port_D = (1 << 3),
-} port_t;
-
-typedef struct pwm_device_s {
-    int fd;
-} pwm_device_t;
-
-typedef struct motor_s {
+struct motor_s {
     pwm_device_t* pwm_device;
-    port_t        port;
-} motor_t;
+    out_port_t    port;
+    MOTORDATA*    data;
+};
 
-void pwm_device_destroy(pwm_device_t* pwm_device);
+static void motor_reset(motor_t* motor);
 
-pwm_device_t* pwm_device_create(void)
+motor_t* motor_create(pwm_device_t* pwm_device, out_port_t port)
 {
-    pwm_device_t* pwm_device = malloc(sizeof(*pwm_device));
-    if (!pwm_device) {
-        return NULL;
-    }
+    motor_t* motor     = NULL;
+    //int      motor_idx = __builtin_ctz((unsigned int) port);
 
-    pwm_device->fd = open(PWM_DEVICE_NAME, O_RDWR);
-    if (pwm_device->fd == -1) {
-        pwm_device_destroy(pwm_device);
-        return NULL;
-    }
-    return pwm_device;
-}
-
-void pwm_device_destroy(pwm_device_t* pwm_device)
-{
-    if (pwm_device) {
-        close(pwm_device->fd);
-        memset(pwm_device, 0UL, sizeof(*pwm_device));
-        free(pwm_device);
-    }
-}
-
-int pwm_device_send(pwm_device_t* pwm_device, const char* command, size_t len)
-{
-    return write(pwm_device->fd, command, len);
-}
-
-motor_t* motor_create(pwm_device_t* pwm_device, port_t port)
-{
-    motor_t* motor = malloc(sizeof(*motor));
+    motor = malloc(sizeof(*motor));
     if (!motor) {
         return NULL;
     }
 
     motor->pwm_device = pwm_device;
     motor->port       = port;
+    /*motor->data       = (MOTORDATA*) pwm_device_mmap(pwm_device, sizeof(MOTORDATA), motor_idx * sizeof(MOTORDATA));
+    if (!motor->data) {
+        motor_destroy(motor);
+        return NULL;
+    }*/
+
+    motor_reset(motor);
+
     return motor;
 }
 
 void motor_destroy(motor_t* motor)
 {
     if (motor) {
+        if (motor->data) {
+            pwm_device_munmap(motor->pwm_device, motor->data, sizeof(MOTORDATA));
+        }
         memset(motor, 0UL, sizeof(*motor));
         free(motor);
     }
 }
 
-int motor_start(motor_t* motor)
-{
-    char motor_command[] = {
-        opOUTPUT_START,
-        motor->port
-    };
+typedef struct motor_cmd_s {
+    DATA8 cmd;
+    DATA8 nos;
+    DATA8 arg;
+} PACKED motor_cmd_t;
 
-    return pwm_device_send(motor->pwm_device, motor_command, sizeof(motor_command));
+#define motor_cmd(motor, command, argument) { \
+    .cmd = (DATA8) command, \
+    .nos = (DATA8) (motor)->port, \
+    .arg = (DATA8) argument }
+
+#define motor_send_cmd(motor, type, cmd_ptr) ({ \
+    const type* _cmd = container_of(cmd_ptr, type, hdr); \
+    pwm_device_send((motor)->pwm_device, (const uint8_t*) _cmd, sizeof(type)); })
+
+#define motor_send_cmd_raw(motor, ...) ({ \
+    uint8_t command[] = {__VA_ARGS__}; \
+    pwm_device_send((motor)->pwm_device, (const uint8_t*) &command[0], sizeof(command)); })
+
+static void motor_reset(motor_t* motor)
+{
+    (void) motor_send_cmd_raw(motor, opOUTPUT_RESET);
 }
 
-int motor_stop(motor_t* motor)
+void motor_start(motor_t* motor)
 {
-    char motor_command[] = {
-        opOUTPUT_STOP,
-        motor->port
-    };
-
-    return pwm_device_send(motor->pwm_device, motor_command, sizeof(motor_command));
+    (void) motor_send_cmd_raw(motor, opOUTPUT_START);
 }
 
-int motor_power(motor_t* motor, int power)
+void motor_stop(motor_t* motor, brake_t brake)
 {
-    char motor_command[] = {
-        opOUTPUT_POWER,
-        motor->port,
-        power
-    };
-
-    return pwm_device_send(motor->pwm_device, motor_command, sizeof(motor_command));
+    (void) motor_send_cmd_raw(motor, opOUTPUT_STOP, motor->port, (DATA8) brake);
 }
 
-int main(void)
+void motor_set_direction(motor_t* motor, direction_t direction)
 {
-    pwm_device_t* pwm_device = pwm_device_create();
-    motor_t*      motor      = motor_create(pwm_device, Port_A);
+    (void) motor_send_cmd_raw(motor, opOUTPUT_POLARITY, motor->port, (DATA8) direction);
+}
 
-    motor_start(motor);
-    motor_power(motor, SPEED);
+void motor_set_power(motor_t* motor, power_t power)
+{
+    (void) motor_send_cmd_raw(motor, opOUTPUT_POWER, motor->port, (DATA8) power);
+}
 
-    sleep(2);
+void motor_set_speed(motor_t* motor, speed_t speed)
+{
+    (void) motor_send_cmd_raw(motor, opOUTPUT_SPEED, motor->port, (DATA8) speed);
+}
 
-    motor_stop(motor);
+speed_t motor_get_speed(motor_t* motor)
+{
+    return (speed_t) motor->data->Speed;
+}
 
-    motor_destroy(motor);
-    pwm_device_destroy(pwm_device);
+typedef struct motor_step_cmd_s {
+    motor_cmd_t hdr;
+    DATA32      ramp_up;
+    DATA32      constant;
+    DATA32      ramp_down;
+    DATA8       brake;
+} PACKED motor_step_cmd_t;
 
-    return 0;
+#define motor_step_cmd(motor, command, argument, ramp_up, constant, ramp_down, brake) { \
+    .hdr       = motor_cmd(motor, command, argument), \
+    .ramp_up   = (DATA32) ramp_up, \
+    .constant  = (DATA32) constant, \
+    .ramp_down = (DATA32) ramp_down, \
+    .brake     = (DATA8) brake }
+
+void motor_step_power(motor_t* motor, power_t power, step_t ramp_up, step_t constant, step_t ramp_down, brake_t brake)
+{
+    motor_step_cmd_t cmd = motor_step_cmd(motor, opOUTPUT_STEP_POWER, power, ramp_up, constant, ramp_down, brake);
+    (void) motor_send_cmd(motor, motor_step_cmd_t, &cmd.hdr);
+}
+
+void motor_time_power(motor_t* motor, power_t power, time_ms_t ramp_up, time_ms_t constant, time_ms_t ramp_down,
+                      brake_t brake)
+{
+    motor_step_cmd_t cmd = motor_step_cmd(motor, opOUTPUT_TIME_POWER, power, ramp_up, constant, ramp_down, brake);
+    (void) motor_send_cmd(motor, motor_step_cmd_t, &cmd.hdr);
+}
+
+void motor_time_speed(motor_t* motor, speed_t speed, time_ms_t ramp_up, time_ms_t constant, time_ms_t ramp_down,
+                      brake_t brake)
+{
+    motor_step_cmd_t cmd = motor_step_cmd(motor, opOUTPUT_TIME_SPEED, speed, ramp_up, constant, ramp_down, brake);
+    (void) motor_send_cmd(motor, motor_step_cmd_t, &cmd.hdr);
+}
+
+void motor_step_sync(motor_t* motor, speed_t speed, turn_ratio_t turn_ratio, step_t steps, brake_t brake)
+{
+    struct motor_step_sync_cmd_s {
+        motor_cmd_t hdr;
+        DATA16      turn_ratio;
+        DATA32      steps;
+        DATA8       brake;
+    } PACKED cmd = {
+        .hdr        = motor_cmd(motor, opOUTPUT_STEP_SYNC, speed),
+        .turn_ratio = (DATA16) turn_ratio,
+        .steps      = (DATA32) steps,
+        .brake      = (DATA8) brake,
+    };
+    (void) motor_send_cmd(motor, struct motor_step_sync_cmd_s, &cmd.hdr);
+}
+
+uint32_t motor_get_tacho_count(motor_t* motor)
+{
+    return (uint32_t) motor->data->TachoSensor;
+}
+
+void motor_clear_tacho_count(motor_t* motor)
+{
+    (void) motor_send_cmd_raw(motor, opOUTPUT_CLR_COUNT);
+    motor->data->TachoSensor = 0;
 }

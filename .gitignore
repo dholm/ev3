@@ -1,9 +1,12 @@
+# Binaries
+test
+
 # Object files
 *.o
 
 # Libraries
 *.a
 
-# Shared objects (inc. Windows DLLs)
+# Shared objects
 *.so
 *.so.*

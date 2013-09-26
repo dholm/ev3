@@ -1,6 +1,6 @@
 AR	:= arm-none-linux-gnueabi-ar
 CC	:= arm-none-linux-gnueabi-gcc
-CFLAGS	:= -Wall -Wextra -I$(HOME)/Projects/ev3sources/lms2012/lms2012/source
+CFLAGS	:= -Wall -Wextra -Ilms2012
 LDFLAGS	:=
 
 Q := @

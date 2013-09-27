@@ -9,7 +9,7 @@ ifeq ($(V),1)
 endif
 
 LIBEV3		:= libev3.a
-LIBEV3_SOURCES	:= pwm_device.c motor.c
+LIBEV3_SOURCES	:= panic.c pwm_device.c uart_device.c motor.c
 
 TARGETS	:= $(LIBEV3) test
 
@@ -23,6 +23,7 @@ $(LIBEV3): $(LIBEV3_SOURCES:.c=.c.o)
 	$(Q)$(AR) -rs $@ $^
 
 %.c.o: %.c
+	$(Q)echo "Compiling $(<).."
 	$(Q)$(CC) -c -o $@ $< $(CFLAGS)
 
 clean:

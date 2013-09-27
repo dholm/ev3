@@ -2,13 +2,7 @@
 #define MOTOR_H
 
 #include "pwm_device.h"
-
-typedef enum out_port_e {
-    OutPort_A = (1 << 0),
-    OutPort_B = (1 << 1),
-    OutPort_C = (1 << 2),
-    OutPort_D = (1 << 3),
-} out_port_t;
+#include "port.h"
 
 typedef enum direction_e {
     Direction_Backward = -1,

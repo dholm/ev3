@@ -4,6 +4,7 @@
 #include <lms2012.h>
 
 #include "macros.h"
+#include "panic.h"
 #include "motor.h"
 
 struct motor_s {
@@ -19,17 +20,16 @@ motor_t* motor_create(pwm_device_t* pwm_device, out_port_t port)
     motor_t* motor     = NULL;
     //int      motor_idx = __builtin_ctz((unsigned int) port);
 
-    motor = malloc(sizeof(*motor));
-    if (!motor) {
-        return NULL;
+    motor = calloc(1, sizeof(motor_t));
+    if (unlikely(!motor)) {
+        panic("Memory allocation failed!");
     }
 
     motor->pwm_device = pwm_device;
     motor->port       = port;
     /*motor->data       = (MOTORDATA*) pwm_device_mmap(pwm_device, sizeof(MOTORDATA), motor_idx * sizeof(MOTORDATA));
-    if (!motor->data) {
-        motor_destroy(motor);
-        return NULL;
+    if (unlikely(!motor->data)) {
+        panic("Failed to map motor device!");
     }*/
 
     motor_reset(motor);
@@ -52,7 +52,7 @@ typedef struct motor_cmd_s {
     DATA8 cmd;
     DATA8 nos;
     DATA8 arg;
-} PACKED motor_cmd_t;
+} ATTRIBUTES(PACKED) motor_cmd_t;
 
 #define motor_cmd(motor, command, argument) { \
     .cmd = (DATA8) command, \
@@ -108,7 +108,7 @@ typedef struct motor_step_cmd_s {
     DATA32      constant;
     DATA32      ramp_down;
     DATA8       brake;
-} PACKED motor_step_cmd_t;
+} ATTRIBUTES(PACKED) motor_step_cmd_t;
 
 #define motor_step_cmd(motor, command, argument, ramp_up, constant, ramp_down, brake) { \
     .hdr       = motor_cmd(motor, command, argument), \
@@ -144,7 +144,7 @@ void motor_step_sync(motor_t* motor, speed_t speed, turn_ratio_t turn_ratio, ste
         DATA16      turn_ratio;
         DATA32      steps;
         DATA8       brake;
-    } PACKED cmd = {
+    } ATTRIBUTES(PACKED) cmd = {
         .hdr        = motor_cmd(motor, opOUTPUT_STEP_SYNC, speed),
         .turn_ratio = (DATA16) turn_ratio,
         .steps      = (DATA32) steps,

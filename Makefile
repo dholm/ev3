@@ -1,33 +1,18 @@
-AR	:= arm-none-linux-gnueabi-ar
-CC	:= arm-none-linux-gnueabi-gcc
-CFLAGS	:= -Wall -Wextra -Ilms2012
-LDFLAGS	:=
+export TOP_DIR := $(CURDIR)
 
-Q := @
-ifeq ($(V),1)
-  Q :=
-endif
+include $(TOP_DIR)/Makefile.inc
 
-LIBEV3		:= libev3.a
-LIBEV3_SOURCES	:= panic.c pwm_device.c uart_device.c motor.c
+SUBDIRS := src test
 
-TARGETS	:= $(LIBEV3) test
+all: $(SUBDIRS)
 
-all: $(TARGETS)
-
-test: test.c.o $(LIBEV3)
-	$(Q)echo "Linking $@.."
-	$(Q)$(CC) -o $@ $^ $(LDFLAGS)
-
-$(LIBEV3): $(LIBEV3_SOURCES:.c=.c.o)
-	$(Q)$(AR) -rs $@ $^
-
-%.c.o: %.c
-	$(Q)echo "Compiling $(<).."
-	$(Q)$(CC) -c -o $@ $< $(CFLAGS)
+$(SUBDIRS):
+	$(Q)make -C $@ all
 
 clean:
-	$(Q)rm -f $(TARGETS)
-	$(Q)rm -f *.o
+	$(Q)for dir in $(SUBDIRS); \
+	do \
+	  (make -C $$dir $@) || exit $$?; \
+	done
 
-.PHONY: all clean
+.PHONY: $(SUBDIRS) clean

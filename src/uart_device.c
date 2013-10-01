@@ -82,3 +82,9 @@ void uart_device_get_info(uart_device_t* uart_device, in_port_t port)
         uart_device_refresh_port_info(uart_device, port);
     }
 }
+
+uint8_t uart_device_get_value(uart_device_t* uart_device, in_port_t port)
+{
+    size_t log_idx = uart_device->uart->Actual[(size_t) port];
+    return (uint8_t) uart_device->uart->Raw[(size_t) port][log_idx][0];
+}

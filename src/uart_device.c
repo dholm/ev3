@@ -11,8 +11,9 @@
 
 #include <lms2012.h>
 
+#include <ev3/uart_device.h>
+
 #include "panic.h"
-#include "uart_device.h"
 
 struct uart_device_s {
     int   fd;

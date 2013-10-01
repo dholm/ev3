@@ -1,8 +1,8 @@
 #ifndef MOTOR_H
 #define MOTOR_H
 
-#include "pwm_device.h"
-#include "port.h"
+#include <ev3/pwm_device.h>
+#include <ev3/port.h>
 
 typedef enum direction_e {
     Direction_Backward = -1,

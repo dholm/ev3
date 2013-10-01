@@ -8,9 +8,10 @@
 
 #include <lms2012.h>
 
-#include "macros.h"
+#include <ev3/macros.h>
+#include <ev3/pwm_device.h>
+
 #include "panic.h"
-#include "pwm_device.h"
 
 struct pwm_device_s {
     int fd;

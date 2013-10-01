@@ -1,7 +1,9 @@
 #ifndef UART_DEVICE_H
 #define UART_DEVICE_H
 
-#include "port.h"
+#include <stdint.h>
+
+#include <ev3/port.h>
 
 typedef struct uart_device_s uart_device_t;
 

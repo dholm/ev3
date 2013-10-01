@@ -12,7 +12,7 @@ TARGETS := $(test)
 
 all: test
 
-$(test): $(test_SOURCES:.c=.c.o)
+$(test): $(test_SOURCES:.c=.c.o) $(TOP_DIR)/src/libev3.so
 	$(Q)echo "Linking $@.."
 	$(Q)$(CC) $(LDFLAGS) -o $@ $^ $(LDLIBS)
 

@@ -2,8 +2,8 @@ override TOP_DIR := $(CURDIR)/..
 
 include $(TOP_DIR)/Makefile.inc
 
-CPPFLAGS := -DPIC
-CFLAGS	 := -Wall -Wextra -I$(TOP_DIR)/lms2012 -I$(TOP_DIR)/include -fPIC
+CPPFLAGS += -DPIC
+CFLAGS	 += -fPIC
 LDLIBS	 :=
 LDFLAGS	 :=
 

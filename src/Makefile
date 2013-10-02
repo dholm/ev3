@@ -8,7 +8,7 @@ LDLIBS	 :=
 LDFLAGS	 :=
 
 libev3	       := libev3.so
-libev3_SOURCES := panic.c pwm_device.c uart_device.c motor.c
+libev3_SOURCES := panic.c pwm_device.c uart_device.c motor.c event_dispatcher.c
 
 TARGETS := $(libev3)
 

@@ -33,7 +33,7 @@ QueueStruct {
 
 NodeType* CONCAT(QueueName, _node_create)(void)
 {
-    return malloc(sizeof(NodeType));
+    return calloc(1, sizeof(NodeType));
 }
 
 void CONCAT(QueueName, _node_destroy)(NodeType* node)
@@ -48,7 +48,7 @@ QueueType* CONCAT(QueueName, _create)(void)
 {
     QueueType* queue;
 
-    queue = malloc(sizeof(QueueType));
+    queue = calloc(1, sizeof(QueueType));
     if (!queue) {
         return NULL;
     }

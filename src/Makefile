@@ -3,12 +3,14 @@ override TOP_DIR := $(CURDIR)/..
 include $(TOP_DIR)/Makefile.inc
 
 CPPFLAGS += -DPIC
-CFLAGS	 += -fPIC
+CFLAGS	 += -Wno-sign-compare -fPIC
 LDLIBS	 :=
 LDFLAGS	 :=
 
 libev3	       := libev3.so
-libev3_SOURCES := panic.c pwm_device.c uart_device.c motor.c event_dispatcher.c
+libev3_SOURCES := \
+	panic.c atomic_queue.c pwm_device.c uart_device.c motor.c \
+	event_dispatcher.c
 
 TARGETS := $(libev3)
 

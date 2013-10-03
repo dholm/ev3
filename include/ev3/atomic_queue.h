@@ -1,111 +1,27 @@
-#include <assert.h>
+#ifndef ATOMIC_QUEUE_H
+#define ATOMIC_QUEUE_H
 
 #include <ev3/macros.h>
-#include <ev3/atomic.h>
 
-#ifndef QueueName
-#  error Instance QueueName not defined
-#endif
+typedef struct atomic_queue_s atomic_queue_t;
+typedef struct atomic_queue_node_tag_s atomic_queue_node_tag_t;
+typedef void (*atomic_queue_node_destroy_fn_t)(void* data, atomic_queue_node_tag_t* node_tag);
 
-#ifndef ValueType
-#  error Storage ValueType not defined
-#endif
+#define atomic_queue_node_tag_def()        atomic_queue_node_tag_t atomic_queue_node_tag
+#define atomic_queue_node_tag_init(node)   (node)->atomic_queue_node_tag.next = NULL
+#define atomic_queue_node_tag_handle(node) &(node)->atomic_queue_node_tag
+#define atomic_queue_node_get(tag, type)   container_of(tag, type, atomic_queue_node_tag)
 
-#define QueueStruct struct CONCAT(QueueName, _s)
-#define QueueType   CONCAT(QueueName, _t)
+atomic_queue_t* atomic_queue_create(void* node_destroy_data, atomic_queue_node_destroy_fn_t node_destroy_fn);
+void            atomic_queue_destroy(atomic_queue_t* queue);
 
-#define NodeStruct struct CONCAT(QueueName, _node_s)
-#define NodeType   CONCAT(QueueName, _node_t)
+int atomic_queue_is_empty(atomic_queue_t* queue);
 
-typedef NodeStruct  NodeType;
-typedef QueueStruct QueueType;
+void                     atomic_queue_push(atomic_queue_t* queue, atomic_queue_node_tag_t* node_tag);
+atomic_queue_node_tag_t* atomic_queue_pop(atomic_queue_t* queue);
 
-NodeStruct {
-    ValueType value;
-    NodeType* next;
+struct atomic_queue_node_tag_s {
+    atomic_queue_node_tag_t* next;
 };
 
-QueueStruct {
-    NodeType* first;
-    NodeType* divider;
-    NodeType* last;
-};
-
-NodeType* CONCAT(QueueName, _node_create)(void)
-{
-    return calloc(1, sizeof(NodeType));
-}
-
-void CONCAT(QueueName, _node_destroy)(NodeType* node)
-{
-    if (node) {
-        memset(node, 0UL, sizeof(NodeType));
-        free(node);
-    }
-}
-
-QueueType* CONCAT(QueueName, _create)(void)
-{
-    QueueType* queue;
-
-    queue = calloc(1, sizeof(QueueType));
-    if (!queue) {
-        return NULL;
-    }
-
-    queue->first = queue->divider = queue->last = CONCAT(QueueName, _node_create)();
-
-    return queue;
-}
-
-void CONCAT(QueueName, _destroy)(QueueType* queue)
-{
-    if (queue) {
-        while (queue->first) {
-            NodeType* tmp = queue->first;
-            queue->first = tmp->next;
-            CONCAT(QueueName, _node_destroy)(tmp);
-        }
-
-        memset(queue, 0UL, sizeof(QueueType));
-        free(queue);
-    }
-}
-
-void CONCAT(QueueName, _push)(QueueType* queue, ValueType value)
-{
-    atomic_acquire_ptr(&queue->last)->next = CONCAT(QueueName, _node_create)();
-    atomic_acquire_ptr(&queue->last)->next->value = value;
-    atomic_release_ptr(&queue->last, queue->last->next);
-
-    while (queue->first != atomic_acquire_ptr(&queue->divider)) {
-        NodeType* tmp = queue->first;
-        queue->first = queue->first->next;
-        CONCAT(QueueName, _node_destroy(tmp));
-    }
-}
-
-int CONCAT(QueueName, _is_empty)(QueueType* queue)
-{
-    return atomic_acquire_ptr(&queue->divider) == atomic_acquire_ptr(&queue->last);
-}
-
-ValueType CONCAT(QueueName, _pop)(QueueType* queue)
-{
-    ValueType value;
-
-    assert(!CONCAT(QueueName, _is_empty)(queue));
-    value = atomic_acquire_ptr(&queue->divider)->next->value;
-    atomic_release_ptr(&queue->divider, atomic_acquire_ptr(&queue->divider)->next);
-
-    return value;
-}
-
-#undef QueueStruct
-#undef QueueType
-
-#undef NodeStruct
-#undef NodeType
-
-#undef ValueType
-#undef QueueName
+#endif /* ATOMIC_QUEUE_H */

@@ -1,5 +1,6 @@
 #include <unistd.h>
 #include <stdlib.h>
+#include <string.h>
 #include <stdio.h>
 
 #include <ev3/macros.h>
@@ -15,7 +16,15 @@ typedef struct sample_event_s {
     uint8_t value;
 } sample_event_t;
 
-void sample_handler(void* data, event_tag_t* event_tag)
+static void sample_event_destroy(void* data, sample_event_t* sample_event)
+{
+    (void)data;
+
+    memset(sample_event, 0UL, sizeof(sample_event_t));
+    free(sample_event);
+}
+
+static void sample_handler(void* data, event_tag_t* event_tag)
 {
     sample_event_t* sample_event = event_get(event_tag, sample_event_t);
     (void)data;
@@ -33,7 +42,8 @@ int main(void)
     event_dispatcher_t* event_dispatcher = event_dispatcher_create();
     event_id_t          sample_ev_id;
 
-    sample_ev_id = event_dispatcher_register_handler(event_dispatcher, sample_handler, NULL);
+    sample_ev_id = event_dispatcher_register_handler(event_dispatcher, sample_handler,
+                                                     (event_destroy_fn_t)sample_event_destroy, NULL);
 
     motor_set_direction(motor, Direction_Backward);
     motor_start(motor);

@@ -2,7 +2,7 @@ export TOP_DIR := $(CURDIR)
 
 include $(TOP_DIR)/Makefile.inc
 
-SUBDIRS := src test
+SUBDIRS := src example test
 
 all: $(SUBDIRS)
 

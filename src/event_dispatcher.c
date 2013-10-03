@@ -54,23 +54,11 @@ fail:
     return NULL;
 }
 
-static void event_dispatcher_destroy_handlers(event_dispatcher_t* event_dispatcher)
-{
-    if (event_dispatcher->handler_array) {
-        event_handler_t* handler = (event_handler_t*)utarray_front(event_dispatcher->handler_array);
-        for (; handler; handler = (event_handler_t*)utarray_next(event_dispatcher->handler_array, handler)) {
-            memset(handler, 0UL, sizeof(event_handler_t));
-            free(handler);
-        }
-        utarray_free(event_dispatcher->handler_array);
-    }
-}
-
 void event_dispatcher_destroy(event_dispatcher_t* event_dispatcher)
 {
     if (event_dispatcher) {
         atomic_queue_destroy(event_dispatcher->queue);
-        event_dispatcher_destroy_handlers(event_dispatcher);
+        utarray_free(event_dispatcher->handler_array);
 
         memset(event_dispatcher, 0UL, sizeof(event_dispatcher_t));
         free(event_dispatcher);
@@ -80,15 +68,18 @@ void event_dispatcher_destroy(event_dispatcher_t* event_dispatcher)
 event_id_t event_dispatcher_register_handler(event_dispatcher_t* event_dispatcher, event_handler_fn_t handler_fn,
                                              event_destroy_fn_t destroy_fn, void* data)
 {
-    event_handler_t* handler  = calloc(1, sizeof(event_handler_t));
+    event_handler_t* handlerp;
+    event_handler_t  handler  = {
+        .handler_fn = handler_fn,
+        .destroy_fn = destroy_fn,
+        .data       = data
+    };
+    utarray_push_back(event_dispatcher->handler_array, &handler);
 
-    handler->handler_fn = handler_fn;
-    handler->destroy_fn = destroy_fn;
-    handler->data       = data;
-    utarray_push_back(event_dispatcher->handler_array, handler);
-    handler->id         = (event_id_t)utarray_eltidx(event_dispatcher->handler_array, handler);
+    handlerp    = (event_handler_t*)utarray_back(event_dispatcher->handler_array);
+    handlerp->id = (event_id_t)utarray_eltidx(event_dispatcher->handler_array, handlerp);
 
-    return handler->id;
+    return handlerp->id;
 }
 
 void event_dispatcher_tick(event_dispatcher_t* event_dispatcher)

@@ -32,11 +32,22 @@ atomic_queue_t* atomic_queue_create(void* node_destroy_data, atomic_queue_node_d
     return queue;
 }
 
+static void atomic_queue_destroy_node(atomic_queue_t* queue, atomic_queue_node_tag_t* node_tag)
+{
+    if (likely(node_tag != queue->null_tag)) {
+        queue->node_destroy_fn(queue->node_destroy_data, node_tag);
+    } else {
+        free(queue->null_tag);
+        queue->null_tag = NULL;
+    }
+}
+
 static void atomic_queue_clear(atomic_queue_t* queue)
 {
-    while (!atomic_queue_is_empty(queue)) {
-        atomic_queue_node_tag_t* node_tag = atomic_queue_pop(queue);
-        queue->node_destroy_fn(queue->node_destroy_data, node_tag);
+    while (queue->first != NULL) {
+        atomic_queue_node_tag_t* node_tag = queue->first;
+        queue->first = node_tag->next;
+        atomic_queue_destroy_node(queue, node_tag);
     }
 }
 
@@ -45,7 +56,6 @@ void atomic_queue_destroy(atomic_queue_t* queue)
     if (queue) {
         atomic_queue_clear(queue);
 
-        memset(queue->null_tag, 0UL, sizeof(atomic_queue_node_tag_t));
         free(queue->null_tag);
 
         memset(queue, 0UL, sizeof(atomic_queue_t));
@@ -61,7 +71,7 @@ void atomic_queue_push(atomic_queue_t* queue, atomic_queue_node_tag_t* node_tag)
     while (queue->first != atomic_acquire_ptr(&queue->divider)) {
         atomic_queue_node_tag_t* tmp = queue->first;
         queue->first = queue->first->next;
-        queue->node_destroy_fn(queue->node_destroy_data, tmp);
+        atomic_queue_destroy_node(queue, tmp);
     }
 }
 
@@ -72,11 +82,12 @@ int atomic_queue_is_empty(atomic_queue_t* queue)
 
 atomic_queue_node_tag_t* atomic_queue_pop(atomic_queue_t* queue)
 {
-    atomic_queue_node_tag_t* node_tag;
+    if (!atomic_queue_is_empty(queue)) {
+        atomic_queue_node_tag_t* node_tag;
+        node_tag = atomic_acquire_ptr(&queue->divider)->next;
+        atomic_release_ptr(&queue->divider, atomic_acquire_ptr(&queue->divider)->next);
+        return node_tag;
+    }
 
-    assert(!atomic_queue_is_empty(queue));
-    node_tag = atomic_acquire_ptr(&queue->divider)->next;
-    atomic_release_ptr(&queue->divider, atomic_acquire_ptr(&queue->divider)->next);
-
-    return node_tag;
+    return NULL;
 }

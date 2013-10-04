@@ -15,6 +15,7 @@
     tcase_add_test(tc, fn); \
     suite_add_tcase(suite, tc)
 
+Suite* allocator_suite_create(void);
 Suite* atomic_queue_suite_create(void);
 Suite* event_dispatcher_suite_create(void);
 

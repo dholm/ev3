@@ -10,6 +10,7 @@
 #define FORMAT(fmt_idx, args_idx) format(printf, fmt_idx, args_idx)
 #define NORETURN                  noreturn
 #define ALIGNED(x)                aligned(x)
+#define MALLOC                    malloc
 
 #define CONCAT(x, y) _CONCAT(x, y)
 #define _CONCAT(x, y) x ## y

@@ -6,16 +6,23 @@ AR := ar
 CC := gcc
 
 CPPFLAGS :=
-CFLAGS   := -Wall -Wextra -Wno-sign-compare -g3 -I$(TOP_DIR)/include $(shell pkg-config --cflags check)
+CFLAGS   := \
+	-Wall -Wextra -Wno-sign-compare \
+	-g3 \
+	-I$(TOP_DIR)/include \
+	$(shell pkg-config --cflags check)
 LDFLAGS	 :=
 LDLIBS	 := $(shell pkg-config --libs check)
 
 libev3         := libev3.a
 libev3_DIR     := $(TOP_DIR)/src
-libev3_SOURCES := $(libev3_DIR)/panic.c $(libev3_DIR)/atomic_queue.c $(libev3_DIR)/event_dispatcher.c
+libev3_SOURCES := \
+	$(libev3_DIR)/panic.c $(libev3_DIR)/allocator.c \
+	$(libev3_DIR)/atomic_queue.c $(libev3_DIR)/event_dispatcher.c
 
 test	     := test
-test_SOURCES := test.c check_atomic_queue.c check_event_dispatcher.c
+test_SOURCES := test.c \
+	check_allocator.c check_atomic_queue.c check_event_dispatcher.c
 
 TARGETS := $(test) $(libev3)
 

@@ -12,7 +12,7 @@
 const power_t SPEED = 50;
 
 typedef struct sample_event_s {
-    event_tag_def();
+    event_tag_decl();
     uint8_t value;
 } sample_event_t;
 

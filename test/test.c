@@ -1,14 +1,9 @@
 #include "test.h"
 
-static Suite* master_suite_create(void)
-{
-    return suite_create("master");
-}
-
 int main(void)
 {
     int      failed;
-    SRunner* runner = srunner_create(master_suite_create());
+    SRunner* runner = srunner_create(allocator_suite_create());
 
     srunner_add_suite(runner, atomic_queue_suite_create());
     srunner_add_suite(runner, event_dispatcher_suite_create());

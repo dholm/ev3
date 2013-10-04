@@ -6,7 +6,7 @@
 #include "test.h"
 
 typedef struct {
-    event_tag_def();
+    event_tag_decl();
     int i;
 } test_event_t;
 

@@ -6,7 +6,7 @@
 #include "test.h"
 
 typedef struct {
-    atomic_queue_node_tag_def();
+    atomic_queue_node_tag_decl();
     int i;
 } test_node_t;
 

@@ -2,34 +2,34 @@
 #include <string.h>
 #include <assert.h>
 
-#include <utarray.h>
-
 #include <ev3/event.h>
 #include <ev3/atomic_queue.h>
+#include <ev3/array.h>
 
 #include "ev3/event_dispatcher.h"
 
+enum { HandlerArrayIncrements = 16 };
+
 struct event_dispatcher_s {
     atomic_queue_t* queue;
-    UT_array*       handler_array;
+    array_t*        handler_array;
+    event_id_t      next_event_id;
 };
 
 typedef struct event_handler_s {
-    event_id_t         id;
-    event_handler_fn_t handler_fn;
-    event_destroy_fn_t destroy_fn;
+    event_handler_fn_t handler;
+    event_destroy_fn_t destroy;
     void*              data;
 } event_handler_t;
-
-const UT_icd event_handler_icd = {sizeof(event_handler_t), NULL, NULL, NULL};
 
 static void event_destroy_fn(event_dispatcher_t* event_dispatcher, atomic_queue_node_tag_t* node_tag)
 {
     event_tag_t*     event_tag = atomic_queue_node_get(node_tag, event_tag_t);
-    event_handler_t* handler   = (event_handler_t*)utarray_eltptr(event_dispatcher->handler_array, event_tag->id);
+    event_handler_t* handler;
 
-    assert(handler);
-    handler->destroy_fn(handler->data, event_tag);
+    assert(event_id(event_tag) < array_get_capacity(event_dispatcher->handler_array));
+    handler = &array_at(event_dispatcher->handler_array, event_id(event_tag), event_handler_t);
+    handler->destroy(handler->data, event_tag);
 }
 
 event_dispatcher_t* event_dispatcher_create(void)
@@ -46,7 +46,7 @@ event_dispatcher_t* event_dispatcher_create(void)
         goto fail;
     }
 
-    utarray_new(event_dispatcher->handler_array, &event_handler_icd);
+    event_dispatcher->handler_array = array_create(sizeof(event_handler_t));
 
     return event_dispatcher;
 fail:
@@ -58,7 +58,7 @@ void event_dispatcher_destroy(event_dispatcher_t* event_dispatcher)
 {
     if (event_dispatcher) {
         atomic_queue_destroy(event_dispatcher->queue);
-        utarray_free(event_dispatcher->handler_array);
+        array_destroy(event_dispatcher->handler_array);
 
         memset(event_dispatcher, 0UL, sizeof(event_dispatcher_t));
         free(event_dispatcher);
@@ -68,18 +68,20 @@ void event_dispatcher_destroy(event_dispatcher_t* event_dispatcher)
 event_id_t event_dispatcher_register_handler(event_dispatcher_t* event_dispatcher, event_handler_fn_t handler_fn,
                                              event_destroy_fn_t destroy_fn, void* data)
 {
-    event_handler_t* handlerp;
-    event_handler_t  handler  = {
-        .handler_fn = handler_fn,
-        .destroy_fn = destroy_fn,
-        .data       = data
-    };
-    utarray_push_back(event_dispatcher->handler_array, &handler);
+    const size_t     handler_array_capacity = array_get_capacity(event_dispatcher->handler_array);
+    const event_id_t event_id               = event_dispatcher->next_event_id++;
+    event_handler_t* handler;
 
-    handlerp    = (event_handler_t*)utarray_back(event_dispatcher->handler_array);
-    handlerp->id = (event_id_t)utarray_eltidx(event_dispatcher->handler_array, handlerp);
+    if (unlikely(handler_array_capacity <= event_id)) {
+        array_reserve(event_dispatcher->handler_array, handler_array_capacity + HandlerArrayIncrements);
+    }
 
-    return handlerp->id;
+    handler = &array_at(event_dispatcher->handler_array, event_id, event_handler_t);
+    handler->handler = handler_fn;
+    handler->destroy = destroy_fn;
+    handler->data    = data;
+
+    return event_id;
 }
 
 void event_dispatcher_tick(event_dispatcher_t* event_dispatcher)
@@ -87,11 +89,11 @@ void event_dispatcher_tick(event_dispatcher_t* event_dispatcher)
     if (!atomic_queue_is_empty(event_dispatcher->queue)) {
         atomic_queue_node_tag_t* node_tag  = atomic_queue_pop(event_dispatcher->queue);
         event_tag_t*             event_tag = atomic_queue_node_get(node_tag, event_tag_t);
-        event_handler_t*         handler   = (event_handler_t*)utarray_eltptr(event_dispatcher->handler_array,
-                                                                              event_tag->id);
+        event_handler_t*         handler;
 
-        assert(handler);
-        handler->handler_fn(handler->data, event_tag);
+        assert(event_id(event_tag) < array_get_capacity(event_dispatcher->handler_array));
+        handler = &array_at(event_dispatcher->handler_array, event_id(event_tag), event_handler_t);
+        handler->handler(handler->data, event_tag);
     }
 }
 

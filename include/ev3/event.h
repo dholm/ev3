@@ -20,6 +20,7 @@ struct event_tag_s {
         (event)->event_tag.id = (id_); \
     } while (0)
 #define event_handle(event)        &(event)->event_tag
+#define event_id(tag)              (tag)->id
 #define event_get(tag, type)       container_of(tag, type, event_tag)
 
 #endif /* EVENT_H */

@@ -9,8 +9,8 @@ LDFLAGS	 :=
 
 libev3	       := libev3.so
 libev3_SOURCES := \
-	panic.c allocator.c atomic_queue.c pwm_device.c uart_device.c motor.c \
-	event_dispatcher.c
+	panic.c allocator.c array.c atomic_queue.c event_dispatcher.c \
+	pwm_device.c uart_device.c motor.c
 
 TARGETS := $(libev3)
 

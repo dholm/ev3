@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <stdarg.h>
 
-#include "panic.h"
+#include <tobor/panic.h>
 
 void _panic(const char* fmt, ...)
 {

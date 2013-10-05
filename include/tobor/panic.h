@@ -1,7 +1,7 @@
 #ifndef PANIC_H
 #define PANIC_H
 
-#include <ev3/macros.h>
+#include <tobor/macros.h>
 
 #define panic(fmt, ...) \
     _panic("panic [%s:%d]: " fmt, __FUNCTION__, __LINE__, ##__VA_ARGS__)

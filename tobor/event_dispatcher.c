@@ -2,11 +2,11 @@
 #include <string.h>
 #include <assert.h>
 
-#include <ev3/event.h>
-#include <ev3/atomic_queue.h>
-#include <ev3/array.h>
+#include <tobor/event.h>
+#include <tobor/atomic_queue.h>
+#include <tobor/array.h>
 
-#include "ev3/event_dispatcher.h"
+#include "tobor/event_dispatcher.h"
 
 enum { HandlerArrayIncrements = 16 };
 

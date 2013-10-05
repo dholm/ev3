@@ -3,10 +3,10 @@
 
 #include <lms2012.h>
 
-#include <ev3/macros.h>
-#include <ev3/motor.h>
+#include <tobor/macros.h>
+#include <tobor/panic.h>
 
-#include "panic.h"
+#include <ev3/motor.h>
 
 struct motor_s {
     pwm_device_t* pwm_device;

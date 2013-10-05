@@ -1,9 +1,9 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <ev3/macros.h>
+#include <tobor/macros.h>
 
-#include "ev3/array.h"
+#include "tobor/array.h"
 
 array_t* array_create(size_t element_size)
 {

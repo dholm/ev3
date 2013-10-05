@@ -1,7 +1,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <ev3/event_dispatcher.h>
+#include <tobor/event_dispatcher.h>
 
 #include "test.h"
 
@@ -60,7 +60,6 @@ START_TEST(test_event_dispatcher_push)
     event_dispatcher = event_dispatcher_create();
     test_event_id = event_dispatcher_register_handler(event_dispatcher, test_event_handler,
                                                       (event_destroy_fn_t)test_event_destroy, &retval);
-    ck_assert_int_ne(test_event_id, -1);
 
     test_event = calloc(1, sizeof(test_event_t));
     event_tag_init(test_event, test_event_id);

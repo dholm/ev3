@@ -1,7 +1,7 @@
 #ifndef ATOMIC_QUEUE_H
 #define ATOMIC_QUEUE_H
 
-#include <ev3/macros.h>
+#include <tobor/macros.h>
 
 typedef struct atomic_queue_s atomic_queue_t;
 typedef struct atomic_queue_node_tag_s atomic_queue_node_tag_t;

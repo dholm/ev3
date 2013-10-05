@@ -3,11 +3,12 @@
 #include <string.h>
 #include <stdio.h>
 
-#include <ev3/macros.h>
+#include <tobor/macros.h>
+#include <tobor/event_dispatcher.h>
+
 #include <ev3/uart_device.h>
 #include <ev3/pwm_device.h>
 #include <ev3/motor.h>
-#include <ev3/event_dispatcher.h>
 
 const power_t SPEED = 50;
 

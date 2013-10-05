@@ -5,6 +5,7 @@ set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra")
 include_directories ("${PROJECT_SOURCE_DIR}/include")
 
 add_subdirectory (tobor)
+add_subdirectory (drivers)
 
 if (${TOBOR_TARGET} MATCHES "ev3")
   add_subdirectory (examples)

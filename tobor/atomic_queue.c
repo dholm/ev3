@@ -2,9 +2,9 @@
 #include <string.h>
 #include <assert.h>
 
-#include <ev3/atomic.h>
+#include <tobor/atomic.h>
 
-#include "ev3/atomic_queue.h"
+#include "tobor/atomic_queue.h"
 
 struct atomic_queue_s {
     void*                          node_destroy_data;

@@ -1,0 +1,16 @@
+set (CMAKE_SYSTEM_NAME Linux)
+set (CMAKE_SYSTEM_PROCESSOR arm)
+
+set (CMAKE_SYSTEM_VERSION 1)
+
+set (TOOLCHAIN_PREFIX arm-none-linux-gnueabi)
+set (CMAKE_C_COMPILER ${TOOLCHAIN_PREFIX}-gcc)
+set (CMAKE_CXX_COMPILER ${TOOLCHAIN_PREFIX}-g++)
+
+add_definitions ("-march=armv5te -mtune=arm9tdmi -msoft-float")
+
+set (CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
+set (CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
+set (CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
+
+set (TOBOR_TARGET ev3)

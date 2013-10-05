@@ -1,11 +1,9 @@
 #ifndef EVENT_H
 #define EVENT_H
 
-#include <inttypes.h>
-
 #include <ev3/atomic_queue.h>
 
-typedef int event_id_t;
+typedef size_t event_id_t;
 typedef struct event_tag_s event_tag_t;
 
 struct event_tag_s {

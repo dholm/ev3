@@ -1,13 +1,1 @@
-# Binaries
-example/test
-test/test
-
-# Object files
-*.o
-
-# Libraries
-*.a
-
-# Shared objects
-*.so
-*.so.*
+build-*

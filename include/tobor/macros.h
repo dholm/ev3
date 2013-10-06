@@ -11,6 +11,7 @@
 #define NORETURN                  noreturn
 #define ALIGNED(x)                aligned(x)
 #define MALLOC                    malloc
+#define WEAK                      weak
 
 #define CONCAT(x, y) _CONCAT(x, y)
 #define _CONCAT(x, y) x ## y

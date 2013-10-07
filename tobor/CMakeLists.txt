@@ -5,6 +5,7 @@ set (tobor_sources
   allocator.c
   array.c
   atomic_queue.c
-  event_dispatcher.c)
+  event_dispatcher.c
+  slist.c)
 
 add_library (tobor ${tobor_sources})

@@ -17,6 +17,7 @@
 
 Suite* allocator_suite_create(void);
 Suite* array_suite_create(void);
+Suite* slist_suite_create(void);
 Suite* atomic_queue_suite_create(void);
 Suite* event_dispatcher_suite_create(void);
 

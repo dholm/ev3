@@ -1,4 +1,3 @@
-#include <sys/mman.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
@@ -14,7 +13,8 @@
 #include <ev3/pwm_device.h>
 
 struct pwm_device_s {
-    int fd;
+    int        fd;
+    MOTORDATA* motor;
 };
 
 pwm_device_t* pwm_device_create(void)
@@ -46,22 +46,4 @@ void pwm_device_destroy(pwm_device_t* pwm_device)
 int pwm_device_send(pwm_device_t* pwm_device, const uint8_t* command, size_t len)
 {
     return write(pwm_device->fd, command, len);
-}
-
-void* pwm_device_mmap(pwm_device_t* pwm_device, size_t len, off_t offset)
-{
-    int   prot  = PROT_READ | PROT_WRITE;
-    int   flags = MAP_FILE | MAP_SHARED;
-    void* ptr;
-
-    ptr = mmap(0, len, prot, flags, pwm_device->fd, offset);
-    if (ptr == MAP_FAILED) {
-        return NULL;
-    }
-    return ptr;
-}
-
-void pwm_device_munmap(UNUSED(pwm_device_t* pwm_device), void* ptr, size_t len)
-{
-    (void) munmap(ptr, len);
 }

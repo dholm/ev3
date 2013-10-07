@@ -9,7 +9,7 @@
 #include <stdio.h>
 #include <inttypes.h>
 
-#include <lms2012.h>
+#include <lms2012/lms2012.h>
 
 #include <tobor/panic.h>
 

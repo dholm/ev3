@@ -1,8 +1,7 @@
 cmake_minimum_required (VERSION 2.8)
-project (ev3)
 
 set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra")
-include_directories ("${PROJECT_SOURCE_DIR}/include")
+include_directories ("${CMAKE_CURRENT_LIST_DIR}/include")
 
 add_subdirectory (tobor)
 add_subdirectory (drivers)

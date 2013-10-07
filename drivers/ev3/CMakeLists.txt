@@ -1,6 +1,5 @@
 project (ev3-driver)
 
-include_directories ("${ev3-driver_SOURCE_DIR}/lms2012")
 set (ev3-driver_sources
   pwm_device.c
   uart_device.c

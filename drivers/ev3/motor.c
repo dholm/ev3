@@ -1,7 +1,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <lms2012.h>
+#include <lms2012/lms2012.h>
 
 #include <tobor/macros.h>
 #include <tobor/panic.h>

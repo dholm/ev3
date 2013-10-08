@@ -12,6 +12,7 @@ set (test_sources
   check_array.c
   check_atomic_queue.c
   check_event_dispatcher.c
+  check_sample.c
   check_slist.c)
 
 set (test_libs

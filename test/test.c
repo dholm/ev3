@@ -9,6 +9,7 @@ int main(void)
     srunner_add_suite(runner, slist_suite_create());
     srunner_add_suite(runner, atomic_queue_suite_create());
     srunner_add_suite(runner, event_dispatcher_suite_create());
+    srunner_add_suite(runner, sample_suite_create());
 
     srunner_run_all(runner, CK_NORMAL);
     failed = srunner_ntests_failed(runner);

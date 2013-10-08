@@ -5,6 +5,7 @@
 
 #include <tobor/macros.h>
 #include <tobor/event_dispatcher.h>
+#include <tobor/sample.h>
 
 #include <ev3/uart_device.h>
 #include <ev3/pwm_device.h>
@@ -14,7 +15,7 @@ const power_t SPEED = 50;
 
 typedef struct sample_event_s {
     event_tag_decl();
-    uint8_t value;
+    sample_t sample;
 } sample_event_t;
 
 static void sample_event_destroy(void* data, sample_event_t* event_tag)
@@ -32,7 +33,7 @@ static void sample_handler(void* data, event_tag_t* event_tag)
     sample_event_t* sample_event = event_get(event_tag, sample_event_t);
     (void)data;
 
-    printf("Value: %d\n", (int)sample_event->value);
+    printf("Value: %d\n", (int)sample_event->sample.value.i8);
     free(sample_event);
 }
 
@@ -56,9 +57,12 @@ int main(void)
     for (i = 0; i < 10; ++i) {
         sample_event_t* event = calloc(1, sizeof(sample_event_t));
         event_tag_init(event, sample_ev_id);
-        event->value = uart_device_get_value(uart_device, InPort_1);
+        event->sample.type     = SampleType_Int8;
+        event->sample.value.i8 = uart_device_get_value(uart_device, InPort_1);
+
         event_dispatcher_push(event_dispatcher, event_handle(event));
         event_dispatcher_tick(event_dispatcher);
+
         sleep(1);
     }
 

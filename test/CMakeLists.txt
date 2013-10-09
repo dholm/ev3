@@ -7,7 +7,8 @@ set (test_sources
   check_atomic_queue.c
   check_event_dispatcher.c
   check_sample.c
-  check_slist.c)
+  check_slist.c
+  check_state_machine.c)
 
 set (test_libs
   tobor

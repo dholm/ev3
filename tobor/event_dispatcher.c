@@ -99,5 +99,5 @@ void event_dispatcher_tick(event_dispatcher_t* event_dispatcher)
 
 void event_dispatcher_push(event_dispatcher_t* event_dispatcher, event_tag_t* event_tag)
 {
-    atomic_queue_push(event_dispatcher->queue, atomic_queue_node_tag_handle(event_tag));
+    atomic_queue_push(event_dispatcher->queue, atomic_queue_node_handle(event_tag));
 }

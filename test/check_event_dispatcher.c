@@ -6,7 +6,7 @@
 #include "test.h"
 
 typedef struct {
-    event_tag_decl();
+    event_decl();
     int i;
 } test_event_t;
 
@@ -62,7 +62,7 @@ START_TEST(test_event_dispatcher_push)
                                                       (event_destroy_fn_t)test_event_destroy, &retval);
 
     test_event = calloc(1, sizeof(test_event_t));
-    event_tag_init(test_event, test_event_id);
+    event_init(test_event, test_event_id);
     test_event->i = i;
     event_dispatcher_push(event_dispatcher, event_handle(test_event));
 

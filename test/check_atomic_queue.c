@@ -6,7 +6,7 @@
 #include "test.h"
 
 typedef struct {
-    atomic_queue_node_tag_decl();
+    atomic_queue_node_decl();
     int i;
 } test_node_t;
 
@@ -48,9 +48,9 @@ START_TEST(test_atomic_queue_push_pop)
     ck_assert(queue != NULL);
 
     node = calloc(1, sizeof(test_node_t));
-    atomic_queue_node_tag_init(node);
+    atomic_queue_node_init(node);
     node->i = i;
-    atomic_queue_push(queue, atomic_queue_node_tag_handle(node));
+    atomic_queue_push(queue, atomic_queue_node_handle(node));
     ck_assert(!atomic_queue_is_empty(queue));
 
     node_tag = atomic_queue_pop(queue);
@@ -80,9 +80,9 @@ START_TEST(test_atomic_queue_push_pop_many)
     for (i = 0; i < count; i += 2) {
         for (j = 0; j < 2; ++j) {
             node = calloc(1, sizeof(test_node_t));
-            atomic_queue_node_tag_init(node);
+            atomic_queue_node_init(node);
             node->i = i + j;
-            atomic_queue_push(queue, atomic_queue_node_tag_handle(node));
+            atomic_queue_push(queue, atomic_queue_node_handle(node));
         }
 
         for (j = 0; j < 2; ++j) {

@@ -7,9 +7,9 @@ typedef struct atomic_queue_s atomic_queue_t;
 typedef struct atomic_queue_node_tag_s atomic_queue_node_tag_t;
 typedef void (*atomic_queue_node_destroy_fn_t)(void* data, atomic_queue_node_tag_t* node_tag);
 
-#define atomic_queue_node_tag_decl()       atomic_queue_node_tag_t atomic_queue_node_tag
-#define atomic_queue_node_tag_init(node)   (node)->atomic_queue_node_tag.next = NULL
-#define atomic_queue_node_tag_handle(node) &(node)->atomic_queue_node_tag
+#define atomic_queue_node_decl()       atomic_queue_node_tag_t atomic_queue_node_tag
+#define atomic_queue_node_init(node)   (node)->atomic_queue_node_tag.next = NULL
+#define atomic_queue_node_handle(node) &(node)->atomic_queue_node_tag
 #define atomic_queue_node_get(tag, type)   container_of(tag, type, atomic_queue_node_tag)
 
 atomic_queue_t* atomic_queue_create(void* node_destroy_data, atomic_queue_node_destroy_fn_t node_destroy_fn);

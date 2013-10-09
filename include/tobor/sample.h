@@ -37,6 +37,7 @@ struct sample_s {
     } value;
 };
 
+int sample_compare(sample_t* lhs, sample_t* rhs);
 int sample_to_string(sample_t* sample, char* str, size_t size);
 
 #endif /* TOBOR_SAMPLE_H */

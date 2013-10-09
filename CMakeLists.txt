@@ -5,9 +5,8 @@ include_directories ("${CMAKE_CURRENT_LIST_DIR}/include")
 
 add_subdirectory (tobor)
 add_subdirectory (drivers)
+add_subdirectory (test)
 
 if (${TOBOR_TARGET} MATCHES "ev3")
   add_subdirectory (examples)
-else (${TOBOR_TARGET} MATCHES "ev3")
-  add_subdirectory (test)
 endif (${TOBOR_TARGET} MATCHES "ev3")

@@ -33,6 +33,23 @@ static const char* format_str(const char* fmt, ...)
         ck_assert_str_eq(str, format_str(fmt, CONCAT(sample_, c_type))); \
     } while (0)
 
+START_TEST(test_sample_compare)
+{
+    sample_t s1 = {
+        .type     = SampleType_Int8,
+        .value.i8 = 0,
+    };
+    sample_t s2 = {
+        .type     = SampleType_Int8,
+        .value.i8 = -1,
+    };
+
+    ck_assert_int_eq(sample_compare(&s1, &s1), 0);
+    ck_assert_int_lt(sample_compare(&s1, &s2), 0);
+    ck_assert_int_gt(sample_compare(&s2, &s1), 0);
+}
+END_TEST
+
 START_TEST(test_sample_to_string)
 {
     TEST_SAMPLE(int8_t, SampleType_Int8, i8, "%d", -100);
@@ -53,6 +70,7 @@ Suite* sample_suite_create(void)
 {
     SUITE_PROLOG("sample");
 
+    TESTCASE("compare", test_sample_compare);
     TESTCASE("to_string", test_sample_to_string);
 
     SUITE_EPILOG();

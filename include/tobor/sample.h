@@ -6,6 +6,10 @@
 
 typedef struct sample_s sample_t;
 typedef enum sample_type_e sample_type_t;
+typedef union sample_value_u sample_value_t;
+
+int sample_compare(sample_t* lhs, sample_t* rhs);
+int sample_to_string(sample_t* sample, char* str, size_t size);
 
 enum sample_type_e {
     SampleType_None,
@@ -21,23 +25,22 @@ enum sample_type_e {
     SampleType_Double,
 };
 
-struct sample_s {
-    sample_type_t type;
-    union {
-        int8_t   i8;
-        uint8_t  u8;
-        int16_t  i16;
-        uint16_t u16;
-        int32_t  i32;
-        uint32_t u32;
-        int64_t  i64;
-        uint64_t u64;
-        float    f;
-        double   d;
-    } value;
+union sample_value_u {
+    int8_t   i8;
+    uint8_t  u8;
+    int16_t  i16;
+    uint16_t u16;
+    int32_t  i32;
+    uint32_t u32;
+    int64_t  i64;
+    uint64_t u64;
+    float    f;
+    double   d;
 };
 
-int sample_compare(sample_t* lhs, sample_t* rhs);
-int sample_to_string(sample_t* sample, char* str, size_t size);
+struct sample_s {
+    sample_type_t  type;
+    sample_value_t value;
+};
 
 #endif /* TOBOR_SAMPLE_H */

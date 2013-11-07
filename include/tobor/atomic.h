@@ -21,12 +21,17 @@
 #  define atomic_load_acquire_ptr(p) __atomic_load_n((p), __ATOMIC_ACQUIRE)
 #  define atomic_load_release_ptr(p) __atomic_load_n((p), __ATOMIC_RELEASE)
 
+#  define atomic_exchange_ptr(p, v) __atomic_exchange_n(p, v, __ATOMIC_SEQ_CST)
+
 #else /* GCC < 4.7 */
 #  if defined(__arm__)
 #    if defined(__linux__)
 
 typedef void (*linux_barrier_fn_t)(void);
 linux_barrier_fn_t arm_barrier ATTRIBUTES(WEAK) = (linux_barrier_fn_t)0xffff0fa0;
+
+typedef uint32_t (*linux_cmpxchg_fn_t)(uint32_t old, uint32_t new, volatile uint32_t* p);
+linux_cmpxchg_fn_t arm_cmpxchg ATTRIBUTES(WEAK) = (linux_cmpxchg_fn_t)0xffff0fc0;
 
 #    elif defined(ARMV5) /* !__linux__ */
 #      define arm_barrier() asm volatile("" : : : "memory")
@@ -42,6 +47,13 @@ linux_barrier_fn_t arm_barrier ATTRIBUTES(WEAK) = (linux_barrier_fn_t)0xffff0fa0
     arm_barrier(); \
     val; })
 #      define atomic_load_release_ptr(p) ({ arm_barrier(); return *p; })
+
+#      define atomic_exchange_ptr(p, v) ({ \
+    typeof(*p) old; \
+    do { \
+        old = *p; \
+    } while (arm_cmpxchg((uint32_t)old, (uint32_t)v, (volatile uint32_t*)p)); \
+    old; })
 
 #  else /* !__arm__ */
 #    error "Atomics not implemented for target architecture!"

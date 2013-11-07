@@ -12,6 +12,7 @@ set (test_sources
 
 set (test_libs
   tobor
+  -pthread
   ${CHECK_LIBRARIES})
 
 find_package (PkgConfig)

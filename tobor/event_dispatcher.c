@@ -18,19 +18,8 @@ struct event_dispatcher_s {
 
 typedef struct event_handler_s {
     event_handler_fn_t handler;
-    event_destroy_fn_t destroy;
     void*              data;
 } event_handler_t;
-
-static void event_destroy_fn(event_dispatcher_t* event_dispatcher, atomic_queue_node_tag_t* node_tag)
-{
-    event_tag_t*     event_tag = atomic_queue_node_get(node_tag, event_tag_t);
-    event_handler_t* handler;
-
-    assert(event_id(event_tag) < array_get_capacity(event_dispatcher->handler_array));
-    handler = &array_at(event_dispatcher->handler_array, event_id(event_tag), event_handler_t);
-    handler->destroy(handler->data, event_tag);
-}
 
 event_dispatcher_t* event_dispatcher_create(void)
 {
@@ -41,7 +30,7 @@ event_dispatcher_t* event_dispatcher_create(void)
         goto fail;
     }
 
-    event_dispatcher->queue = atomic_queue_create(event_dispatcher, (atomic_queue_node_destroy_fn_t)event_destroy_fn);
+    event_dispatcher->queue = atomic_queue_create();
     if (!event_dispatcher->queue) {
         goto fail;
     }
@@ -66,7 +55,7 @@ void event_dispatcher_destroy(event_dispatcher_t* event_dispatcher)
 }
 
 event_id_t event_dispatcher_register_handler(event_dispatcher_t* event_dispatcher, event_handler_fn_t handler_fn,
-                                             event_destroy_fn_t destroy_fn, void* data)
+                                             void* data)
 {
     const size_t     handler_array_capacity = array_get_capacity(event_dispatcher->handler_array);
     const event_id_t event_id               = event_dispatcher->next_event_id++;
@@ -78,7 +67,6 @@ event_id_t event_dispatcher_register_handler(event_dispatcher_t* event_dispatche
 
     handler = &array_at(event_dispatcher->handler_array, event_id, event_handler_t);
     handler->handler = handler_fn;
-    handler->destroy = destroy_fn;
     handler->data    = data;
 
     return event_id;

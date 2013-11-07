@@ -10,25 +10,11 @@ typedef struct {
     int i;
 } test_node_t;
 
-static void test_node_destroy(void* data, atomic_queue_node_tag_t* node_tag)
-{
-    test_node_t* test_node;
-
-    ck_assert(data == NULL);
-    ck_assert(node_tag != NULL);
-
-    test_node = atomic_queue_node_get(node_tag, test_node_t);
-    ck_assert(test_node != NULL);
-
-    memset(test_node, 0UL, sizeof(test_node_t));
-    free(test_node);
-}
-
 START_TEST(test_atomic_queue_create)
 {
     atomic_queue_t* queue;
 
-    queue = atomic_queue_create(NULL, test_node_destroy);
+    queue = atomic_queue_create();
     ck_assert(queue != NULL);
 
     ck_assert(atomic_queue_is_empty(queue));
@@ -44,7 +30,7 @@ START_TEST(test_atomic_queue_push_pop)
     test_node_t*             node;
     const int                i        = 1;
 
-    queue = atomic_queue_create(NULL, test_node_destroy);
+    queue = atomic_queue_create();
     ck_assert(queue != NULL);
 
     node = calloc(1, sizeof(test_node_t));
@@ -61,6 +47,9 @@ START_TEST(test_atomic_queue_push_pop)
     ck_assert(node != NULL);
     ck_assert_int_eq(node->i, i);
 
+    memset(node, 0UL, sizeof(test_node_t));
+    free(node);
+
     atomic_queue_destroy(queue);
 }
 END_TEST
@@ -74,7 +63,7 @@ START_TEST(test_atomic_queue_push_pop_many)
     int                      i;
     int                      j;
 
-    queue = atomic_queue_create(NULL, test_node_destroy);
+    queue = atomic_queue_create();
     ck_assert(queue != NULL);
 
     for (i = 0; i < count; i += 2) {
@@ -93,6 +82,9 @@ START_TEST(test_atomic_queue_push_pop_many)
             node = atomic_queue_node_get(node_tag, test_node_t);
             ck_assert(node != NULL);
             ck_assert_int_eq(node->i, i + j);
+
+            memset(node, 0UL, sizeof(test_node_t));
+            free(node);
         }
     }
     ck_assert(atomic_queue_is_empty(queue));

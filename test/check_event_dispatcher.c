@@ -10,20 +10,6 @@ typedef struct {
     int i;
 } test_event_t;
 
-static void test_event_destroy(void* data, event_tag_t* event_tag)
-{
-    test_event_t* test_event;
-
-    ck_assert(data != NULL);
-    ck_assert(event_tag != NULL);
-
-    test_event = event_get(event_tag, test_event_t);
-    ck_assert(test_event != NULL);
-
-    memset(test_event, 0UL, sizeof(test_event_t));
-    free(test_event);
-}
-
 static void test_event_handler(void* data, event_tag_t* event_tag)
 {
     test_event_t* retval     = (test_event_t*)data;
@@ -36,6 +22,7 @@ static void test_event_handler(void* data, event_tag_t* event_tag)
     ck_assert(test_event != NULL);
 
     *retval = *test_event;
+    free(test_event);
 }
 
 START_TEST(test_event_dispatcher_create)
@@ -58,8 +45,7 @@ START_TEST(test_event_dispatcher_push)
     const int           i                = 1;
 
     event_dispatcher = event_dispatcher_create();
-    test_event_id = event_dispatcher_register_handler(event_dispatcher, test_event_handler,
-                                                      (event_destroy_fn_t)test_event_destroy, &retval);
+    test_event_id = event_dispatcher_register_handler(event_dispatcher, test_event_handler, &retval);
 
     test_event = calloc(1, sizeof(test_event_t));
     event_init(test_event, test_event_id);

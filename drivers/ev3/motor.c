@@ -63,16 +63,15 @@ static int motor_mmap(motor_t* motor)
 {
     int   prot   = PROT_READ | PROT_WRITE;
     int   flags  = MAP_FILE | MAP_SHARED;
-    void* ptr;
     int   idx    = __builtin_ctz((unsigned int)motor->port);
     off_t offset = idx * sizeof(MOTORDATA);
 
     motor->data = (MOTORDATA*)mmap(0, sizeof(MOTORDATA), prot, flags, motor->fd, offset);
-    if (ptr == MAP_FAILED) {
+    if (motor->data == MAP_FAILED) {
         motor->data = NULL;
-        return -1;
+        return 0;
     }
-    return 0;
+    return 1;
 }
 
 static void motor_munmap(motor_t* motor)

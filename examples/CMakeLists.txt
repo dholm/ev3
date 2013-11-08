@@ -5,7 +5,8 @@ set (mrbrick_sources
 
 set (examples_libs
   ev3-driver
-  tobor)
+  tobor
+  pthread)
 
 add_executable (mrbrick ${mrbrick_sources})
 target_link_libraries (mrbrick ${examples_libs})

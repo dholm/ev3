@@ -11,4 +11,6 @@ void             state_machine_destroy(state_machine_t* state_machine);
 void state_machine_start(state_machine_t* state_machine, state_tag_t* initial_state);
 void state_machine_transition(state_machine_t* state_machine, state_tag_t* state);
 
+void state_machine_handle_event(state_machine_t* state_machine, event_tag_t* event_tag);
+
 #endif /* TOBOR_STATE_MACHINE_H */

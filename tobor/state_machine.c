@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <string.h>
+#include <assert.h>
 
 #include "tobor/state_machine.h"
 
@@ -40,4 +41,10 @@ void state_machine_transition(state_machine_t* state_machine, state_tag_t* state
     }
     state_enter(state);
     state_machine->state = state;
+}
+
+void state_machine_handle_event(state_machine_t* state_machine, event_tag_t* event_tag)
+{
+    assert(state_machine->state != NULL);
+    state_handle_event(state_machine->state, event_tag);
 }
